@@ -9,7 +9,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { Suspense } from "react";
 
 const loaderFn = createServerFn().handler(async () => {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  // await new Promise((resolve) => setTimeout(resolve, 2000));
   const response = await fetch(
     "https://jsonplaceholder.typicode.com/posts"
   ).then((res) => res.json());

@@ -3,17 +3,19 @@ import {
   Link,
   Outlet,
   Scripts,
-  createRootRoute,
   createRootRouteWithContext,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import * as React from "react";
-import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
-import { NotFound } from "~/components/NotFound";
-import appCss from "~/styles/app.css?url";
-import { seo } from "~/utils/seo";
+import { DefaultCatchBoundary } from "src/components/DefaultCatchBoundary";
+import { NotFound } from "src/components/NotFound";
+import appCss from "@/styles/app.css?url";
+import { seo } from "src/utils/seo";
 import { QueryClient } from "@tanstack/react-query";
+import { ThemeProvider } from "@/components/theme-provider";
+import ThemeToggle from "@/components/mode-toggle";
+import { RadixSidebarDemo } from "@/components/Sidebar-Demo";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -82,8 +84,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <Link to="/another">Another</Link>
-        {children}
+        <ThemeProvider>
+          <RadixSidebarDemo />
+          {children}
+          <Link to="/another">Another</Link>
+          <div className="fixed top-4 right-4">
+            <ThemeToggle />
+          </div>
+        </ThemeProvider>
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>
