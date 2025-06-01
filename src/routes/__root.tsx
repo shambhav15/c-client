@@ -15,7 +15,6 @@ import { seo } from "src/utils/seo";
 import { QueryClient } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/theme-provider";
 import ThemeToggle from "@/components/mode-toggle";
-import { RadixSidebarDemo } from "@/components/Sidebar-Demo";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -30,31 +29,12 @@ export const Route = createRootRouteWithContext<{
         content: "width=device-width, initial-scale=1",
       },
       ...seo({
-        title:
-          "TanStack Start | Type-Safe, Client-First, Full-Stack React Framework",
+        title: "Tan",
         description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
       }),
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      {
-        rel: "apple-touch-icon",
-        sizes: "180x180",
-        href: "/apple-touch-icon.png",
-      },
-      {
-        rel: "icon",
-        type: "image/png",
-        sizes: "32x32",
-        href: "/favicon-32x32.png",
-      },
-      {
-        rel: "icon",
-        type: "image/png",
-        sizes: "16x16",
-        href: "/favicon-16x16.png",
-      },
-      { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
       { rel: "icon", href: "/favicon.ico" },
     ],
   }),
@@ -82,12 +62,37 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html>
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const storageKey = 'vite-ui-theme';
+                const theme = localStorage.getItem(storageKey) || 'system';
+                const root = document.documentElement;
+                
+                root.classList.remove('light', 'dark');
+                
+                if (theme === 'system') {
+                  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+                    ? 'dark'
+                    : 'light';
+                  root.classList.add(systemTheme);
+                } else {
+                  root.classList.add(theme);
+                }
+                
+                // Also set a dark background immediately to prevent flash
+                root.style.colorScheme = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                  ? 'dark'
+                  : 'light';
+              })();
+            `,
+          }}
+        />
       </head>
       <body>
         <ThemeProvider>
-          <RadixSidebarDemo />
           {children}
-          <Link to="/another">Another</Link>
           <div className="fixed top-4 right-4">
             <ThemeToggle />
           </div>

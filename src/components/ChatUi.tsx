@@ -1,61 +1,143 @@
-import { useState } from "react";
-// import { GoogleGenerativeAI } from "@google/generative-ai";
-import axios from "axios";
-import { GoogleGenAI } from "@google/genai";
+import { useState, useRef, useEffect } from "react";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { HumanMessage, AIMessage, BaseMessage } from "@langchain/core/messages";
+import { v4 as uuidv4 } from "uuid";
+import { trimMessages } from "@langchain/core/messages";
+
 type Message = {
   id: string;
   content: string;
   role: "user" | "assistant";
 };
 
+export const sanitizeMessage = (message: string) => {
+  return message
+    .trim()
+    .replace(/^```json\n/, "")
+    .replace(/```$/, "")
+    .replace(/\\n/g, "<br/>")
+    .replace(
+      /\*\*(\d+\.)\s*([^:*]+):\*\*/g,
+      '<strong class="block mt-2">$1 $2:</strong>'
+    )
+    .replace(/\*\*([^*]+?):\*\*/g, "<strong>$1:</strong>")
+    .replace(/\*\*([^*]+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\n/g, "<br/>")
+    .replace(/_([^_]+)_/g, "<em>$1</em>")
+    .replace(
+      /`([^`]+)`/g,
+      "<code class='bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs'>$1</code>"
+    )
+    .replace(/\*\s*(.*?)(?:<br\/>|$)/g, '<li class="ml-4">$1</li>')
+    .replace(
+      /(<li.*?>.*?<\/li>)+/g,
+      '<ul class="list-disc space-y-1 mt-2">$&</ul>'
+    );
+};
+
 const ChatUi = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
-  const ai = new GoogleGenAI({ apiKey });
+  const llm = new ChatGoogleGenerativeAI({
+    apiKey,
+    model: "gemini-2.5-flash-preview-04-17",
+    temperature: 0,
+    streaming: true,
+    cache: true,
+  });
+
+  // Scroll to bottom whenever messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Create a message trimmer to prevent context overflow
+  const messageTrimmer = trimMessages({
+    maxTokens: 4000, // Adjust based on model's context window
+    strategy: "last",
+    includeSystem: true,
+    tokenCounter: (text) => Math.ceil(text.length / 4), // Simple approximation of token counting
+    allowPartial: false,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isStreaming) return;
 
     // Add user message
     const userMessage: Message = {
-      id: (Date.now() + 1).toString(),
+      id: uuidv4(),
       content: input,
       role: "user",
     };
     setMessages((prev) => [...prev, userMessage]);
+
+    // Create placeholder for AI response
+    const responseId = uuidv4();
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: responseId,
+        content: "",
+        role: "assistant",
+      },
+    ]);
+
     setInput(""); // Clear input
+    setIsStreaming(true);
 
     try {
-      // Using the models API as per the documentation
-      const result = await ai.models.generateContent({
-        model: "gemini-2.5-flash-preview-04-17",
-        contents: input,
-      });
+      // Convert our UI messages to LangChain message format
+      const langchainMessages: BaseMessage[] = messages.map((msg) =>
+        msg.role === "user"
+          ? new HumanMessage(msg.content)
+          : new AIMessage(msg.content)
+      );
 
-      // Get the response text safely
-      const responseText = result.text || "I couldn't generate a response";
+      // Add the current input as a HumanMessage
+      langchainMessages.push(new HumanMessage(input));
 
-      const aiMessage: Message = {
-        id: (Date.now() + 2).toString(),
-        content: responseText,
-        role: "assistant",
-      };
+      // Trim messages to prevent context overflow
+      const trimmedMessages = await messageTrimmer.invoke(langchainMessages);
 
-      setMessages((prev) => [...prev, aiMessage]);
+      // Stream the response
+      const stream = await llm.stream(trimmedMessages);
+
+      // Process the stream
+      let streamedContent = "";
+
+      for await (const chunk of stream) {
+        if (typeof chunk.content === "string") {
+          streamedContent += chunk.content;
+          // Update the content incrementally for streaming effect
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === responseId ? { ...msg, content: streamedContent } : msg
+            )
+          );
+        }
+      }
     } catch (error) {
       console.error("Error fetching AI response:", error);
 
-      // Add error message to chat
-      const errorMessage: Message = {
-        id: (Date.now() + 2).toString(),
-        content: "Sorry, I encountered an error while processing your request.",
-        role: "assistant",
-      };
-
-      setMessages((prev) => [...prev, errorMessage]);
+      // Update error message to the placeholder message
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === responseId
+            ? {
+                ...msg,
+                content:
+                  "Sorry, I encountered an error while processing your request.",
+              }
+            : msg
+        )
+      );
+    } finally {
+      setIsStreaming(false);
     }
   };
 
@@ -82,10 +164,23 @@ const ChatUi = () => {
                   : "bg-muted text-muted-foreground"
               }`}
             >
-              {message.content}
+              {message.role === "assistant" ? (
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      sanitizeMessage(message.content) ||
+                      (isStreaming
+                        ? '<span class="animate-pulse">•••</span>'
+                        : ""),
+                  }}
+                />
+              ) : (
+                message.content
+              )}
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
@@ -97,12 +192,18 @@ const ChatUi = () => {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
             className="flex-1 text-sm rounded-md p-2 bg-background border border-input"
+            disabled={isStreaming}
           />
           <button
             type="submit"
-            className="px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm"
+            className={`px-3 py-2 rounded-md bg-primary text-primary-foreground transition-colors text-sm ${
+              isStreaming
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-primary/90"
+            }`}
+            disabled={isStreaming}
           >
-            Send
+            {isStreaming ? "Sending..." : "Send"}
           </button>
         </div>
       </form>

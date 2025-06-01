@@ -8,18 +8,26 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as AnotherImport } from './routes/another'
 import { Route as IndexImport } from './routes/index'
-import { Route as UsersUserIdImport } from './routes/users.$userId'
+import { Route as ProtectedIndexImport } from './routes/protected/index'
+import { Route as ProtectedLayoutImport } from './routes/protected/_layout'
+import { Route as ProtectedLayoutSocketImport } from './routes/protected/_layout/socket'
+import { Route as ProtectedLayoutExampleImport } from './routes/protected/_layout/example'
+
+// Create Virtual Routes
+
+const ProtectedImport = createFileRoute('/protected')()
 
 // Create/Update Routes
 
-const AnotherRoute = AnotherImport.update({
-  id: '/another',
-  path: '/another',
+const ProtectedRoute = ProtectedImport.update({
+  id: '/protected',
+  path: '/protected',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -29,10 +37,27 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const UsersUserIdRoute = UsersUserIdImport.update({
-  id: '/users/$userId',
-  path: '/users/$userId',
-  getParentRoute: () => rootRoute,
+const ProtectedIndexRoute = ProtectedIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+
+const ProtectedLayoutRoute = ProtectedLayoutImport.update({
+  id: '/_layout',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+
+const ProtectedLayoutSocketRoute = ProtectedLayoutSocketImport.update({
+  id: '/socket',
+  path: '/socket',
+  getParentRoute: () => ProtectedLayoutRoute,
+} as any)
+
+const ProtectedLayoutExampleRoute = ProtectedLayoutExampleImport.update({
+  id: '/example',
+  path: '/example',
+  getParentRoute: () => ProtectedLayoutRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -46,63 +71,128 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/another': {
-      id: '/another'
-      path: '/another'
-      fullPath: '/another'
-      preLoaderRoute: typeof AnotherImport
+    '/protected': {
+      id: '/protected'
+      path: '/protected'
+      fullPath: '/protected'
+      preLoaderRoute: typeof ProtectedImport
       parentRoute: typeof rootRoute
     }
-    '/users/$userId': {
-      id: '/users/$userId'
-      path: '/users/$userId'
-      fullPath: '/users/$userId'
-      preLoaderRoute: typeof UsersUserIdImport
-      parentRoute: typeof rootRoute
+    '/protected/_layout': {
+      id: '/protected/_layout'
+      path: '/protected'
+      fullPath: '/protected'
+      preLoaderRoute: typeof ProtectedLayoutImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/protected/': {
+      id: '/protected/'
+      path: '/'
+      fullPath: '/protected/'
+      preLoaderRoute: typeof ProtectedIndexImport
+      parentRoute: typeof ProtectedImport
+    }
+    '/protected/_layout/example': {
+      id: '/protected/_layout/example'
+      path: '/example'
+      fullPath: '/protected/example'
+      preLoaderRoute: typeof ProtectedLayoutExampleImport
+      parentRoute: typeof ProtectedLayoutImport
+    }
+    '/protected/_layout/socket': {
+      id: '/protected/_layout/socket'
+      path: '/socket'
+      fullPath: '/protected/socket'
+      preLoaderRoute: typeof ProtectedLayoutSocketImport
+      parentRoute: typeof ProtectedLayoutImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface ProtectedLayoutRouteChildren {
+  ProtectedLayoutExampleRoute: typeof ProtectedLayoutExampleRoute
+  ProtectedLayoutSocketRoute: typeof ProtectedLayoutSocketRoute
+}
+
+const ProtectedLayoutRouteChildren: ProtectedLayoutRouteChildren = {
+  ProtectedLayoutExampleRoute: ProtectedLayoutExampleRoute,
+  ProtectedLayoutSocketRoute: ProtectedLayoutSocketRoute,
+}
+
+const ProtectedLayoutRouteWithChildren = ProtectedLayoutRoute._addFileChildren(
+  ProtectedLayoutRouteChildren,
+)
+
+interface ProtectedRouteChildren {
+  ProtectedLayoutRoute: typeof ProtectedLayoutRouteWithChildren
+  ProtectedIndexRoute: typeof ProtectedIndexRoute
+}
+
+const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedLayoutRoute: ProtectedLayoutRouteWithChildren,
+  ProtectedIndexRoute: ProtectedIndexRoute,
+}
+
+const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
+  ProtectedRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/another': typeof AnotherRoute
-  '/users/$userId': typeof UsersUserIdRoute
+  '/protected': typeof ProtectedLayoutRouteWithChildren
+  '/protected/': typeof ProtectedIndexRoute
+  '/protected/example': typeof ProtectedLayoutExampleRoute
+  '/protected/socket': typeof ProtectedLayoutSocketRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/another': typeof AnotherRoute
-  '/users/$userId': typeof UsersUserIdRoute
+  '/protected': typeof ProtectedIndexRoute
+  '/protected/example': typeof ProtectedLayoutExampleRoute
+  '/protected/socket': typeof ProtectedLayoutSocketRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/another': typeof AnotherRoute
-  '/users/$userId': typeof UsersUserIdRoute
+  '/protected': typeof ProtectedRouteWithChildren
+  '/protected/_layout': typeof ProtectedLayoutRouteWithChildren
+  '/protected/': typeof ProtectedIndexRoute
+  '/protected/_layout/example': typeof ProtectedLayoutExampleRoute
+  '/protected/_layout/socket': typeof ProtectedLayoutSocketRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/another' | '/users/$userId'
+  fullPaths:
+    | '/'
+    | '/protected'
+    | '/protected/'
+    | '/protected/example'
+    | '/protected/socket'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/another' | '/users/$userId'
-  id: '__root__' | '/' | '/another' | '/users/$userId'
+  to: '/' | '/protected' | '/protected/example' | '/protected/socket'
+  id:
+    | '__root__'
+    | '/'
+    | '/protected'
+    | '/protected/_layout'
+    | '/protected/'
+    | '/protected/_layout/example'
+    | '/protected/_layout/socket'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AnotherRoute: typeof AnotherRoute
-  UsersUserIdRoute: typeof UsersUserIdRoute
+  ProtectedRoute: typeof ProtectedRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AnotherRoute: AnotherRoute,
-  UsersUserIdRoute: UsersUserIdRoute,
+  ProtectedRoute: ProtectedRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -116,18 +206,38 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/another",
-        "/users/$userId"
+        "/protected"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/another": {
-      "filePath": "another.tsx"
+    "/protected": {
+      "filePath": "protected",
+      "children": [
+        "/protected/_layout",
+        "/protected/"
+      ]
     },
-    "/users/$userId": {
-      "filePath": "users.$userId.tsx"
+    "/protected/_layout": {
+      "filePath": "protected/_layout.tsx",
+      "parent": "/protected",
+      "children": [
+        "/protected/_layout/example",
+        "/protected/_layout/socket"
+      ]
+    },
+    "/protected/": {
+      "filePath": "protected/index.tsx",
+      "parent": "/protected"
+    },
+    "/protected/_layout/example": {
+      "filePath": "protected/_layout/example.tsx",
+      "parent": "/protected/_layout"
+    },
+    "/protected/_layout/socket": {
+      "filePath": "protected/_layout/socket.tsx",
+      "parent": "/protected/_layout"
     }
   }
 }

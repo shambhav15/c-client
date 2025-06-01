@@ -1,15 +1,6 @@
 "use client";
 
 import * as React from "react";
-
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarProvider,
@@ -72,7 +63,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ChatUi from "./ChatUi";
-
+import { Link, Outlet } from "@tanstack/react-router";
+import { Disclosure } from "./Disclosure";
 
 const DATA = {
   user: {
@@ -106,8 +98,12 @@ const DATA = {
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Example",
+          url: "/protected/example",
+        },
+        {
+          title: "Socket",
+          url: "/protected/socket",
         },
         {
           title: "Starred",
@@ -300,9 +296,9 @@ export const RadixSidebarDemo = () => {
                         {item.items?.map((subItem) => (
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton asChild>
-                              <a href={subItem.url}>
+                              <Link to={subItem.url}>
                                 <span>{subItem.title}</span>
-                              </a>
+                              </Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         ))}
@@ -462,24 +458,12 @@ export const RadixSidebarDemo = () => {
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Application
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" /> */}
-          <ChatUi />  
+        <div className="flex flex-col gap-4 px-4 pt-0">
+          {/* <ChatUi /> */}
+          {/* <Disclosure /> */}
+          <Outlet />
         </div>
       </SidebarInset>
     </SidebarProvider>
