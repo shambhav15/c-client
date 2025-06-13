@@ -7,6 +7,6 @@ export const authClient = createAuthClient({
 export const signIn = async () => {
   return await authClient.signIn.social({
     provider: "google",
-    // callbackURL: "http://localhost:3000/api/auth/callback",
+    callbackURL: "http://localhost:3000/sso/success/google",
   });
 };

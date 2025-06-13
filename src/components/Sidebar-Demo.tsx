@@ -73,7 +73,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ChatUi from "./ChatUi";
 import { Button } from "./ui/button";
-import { authClient } from "@/lib/auth-client";
+import { signIn } from "@/lib/auth-client";
 const DATA = {
   user: {
     name: "You",
@@ -186,9 +186,7 @@ export const RadixSidebarDemo = () => {
   // In your component:
   const handleGoogleLogin = async () => {
     try {
-      const response = await authClient.signIn.social({
-        provider: "google",
-      });
+      const response = await signIn();
       console.log("res:", response);
     } catch (error) {
       console.error("Login error:", error);
