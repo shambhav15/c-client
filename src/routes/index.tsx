@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { signIn } from "@/lib/auth-client";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
@@ -5,6 +7,14 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await signIn();
+      console.log("res:", response);
+    } catch (error) {
+      console.error("Login error:", error);
+    }
+  };
   return (
     <div className="flex items-center justify-center h-full">
       <div className="text-center">
@@ -14,6 +24,12 @@ function Home() {
         <p className="text-muted-foreground">
           Select a contact from the sidebar to start chatting
         </p>
+        <Button
+          onClick={handleGoogleLogin}
+          className="flex items-center justify-center gap-2 w-full max-w-sm mx-auto bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm"
+        >
+          Sign in with Google
+        </Button>
       </div>
     </div>
   );
