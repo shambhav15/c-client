@@ -73,7 +73,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ChatUi from "./ChatUi";
 import { Button } from "./ui/button";
-import { signIn } from "@/lib/auth-client";
+import { signIn, useSession } from "@/lib/auth-client";
+import { LogoutButton } from "@/components/LogoutButton";
+
 const DATA = {
   user: {
     name: "You",
@@ -183,15 +185,8 @@ const DATA = {
 export const RadixSidebarDemo = () => {
   const isMobile = useIsMobile();
   const [activeChat, setActiveChat] = React.useState(DATA.chats[0]);
-  // In your component:
-  const handleGoogleLogin = async () => {
-    try {
-      const response = await signIn();
-      console.log("res:", response);
-    } catch (error) {
-      console.error("Login error:", error);
-    }
-  };
+  const { data: session } = useSession();
+  const user = session?.user;
 
   if (!activeChat) return null;
 
@@ -363,17 +358,19 @@ export const RadixSidebarDemo = () => {
                   >
                     <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarImage
-                        src={DATA.user.avatar}
-                        alt={DATA.user.name}
+                        src={user?.image || DATA.user.avatar}
+                        alt={user?.name || DATA.user.name}
                       />
-                      <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                      <AvatarFallback className="rounded-lg">
+                        {user?.name?.charAt(0)?.toUpperCase() || "CN"}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">
-                        {DATA.user.name}
+                        {user?.name || DATA.user.name}
                       </span>
                       <span className="truncate text-xs">
-                        {DATA.user.email}
+                        {user?.email || DATA.user.email}
                       </span>
                     </div>
                     <ChevronsUpDown className="ml-auto size-4" />
@@ -389,19 +386,19 @@ export const RadixSidebarDemo = () => {
                     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                       <Avatar className="h-8 w-8 rounded-lg">
                         <AvatarImage
-                          src={DATA.user.avatar}
-                          alt={DATA.user.name}
+                          src={user?.image || DATA.user.avatar}
+                          alt={user?.name || DATA.user.name}
                         />
                         <AvatarFallback className="rounded-lg">
-                          CN
+                          {user?.name?.charAt(0)?.toUpperCase() || "CN"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-semibold">
-                          {DATA.user.name}
+                          {user?.name || DATA.user.name}
                         </span>
                         <span className="truncate text-xs">
-                          {DATA.user.email}
+                          {user?.email || DATA.user.email}
                         </span>
                       </div>
                     </div>
@@ -429,9 +426,12 @@ export const RadixSidebarDemo = () => {
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <LogOut />
-                    Log out
+                  <DropdownMenuItem asChild>
+                    <LogoutButton
+                      variant="ghost"
+                      className="w-full justify-start p-2 h-auto font-normal cursor-pointer"
+                      showIcon={true}
+                    />
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -460,16 +460,6 @@ export const RadixSidebarDemo = () => {
             </Breadcrumb>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" /> */}
-          <ChatUi />
-          <Button
-            onClick={handleGoogleLogin}
-            className="flex items-center justify-center gap-2 w-full max-w-sm mx-auto bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm"
-          >
-            Sign in with Google
-          </Button>
-        </div>
       </SidebarInset>
     </SidebarProvider>
   );

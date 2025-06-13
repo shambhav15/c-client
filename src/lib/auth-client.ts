@@ -10,3 +10,6 @@ export const signIn = async () => {
     callbackURL: "http://localhost:3000/sso/success/google",
   });
 };
+
+// Export commonly used auth methods
+export const { useSession, getSession, signOut } = authClient;

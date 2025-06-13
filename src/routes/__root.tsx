@@ -4,6 +4,7 @@ import {
   Scripts,
   createRootRouteWithContext,
   type ErrorComponentProps,
+  useLocation,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import * as React from "react";
@@ -77,6 +78,9 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  const isLoginPage = location.pathname === "/login";
+
   return (
     <html>
       <head>
@@ -84,7 +88,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ThemeProvider>
-          {/* <RadixSidebarDemo /> */}
+          {!isLoginPage && <RadixSidebarDemo />}
           <div className="fixed top-4 right-4 z-50">
             <ThemeToggle />
           </div>
@@ -92,7 +96,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         </ThemeProvider>
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
-        
       </body>
     </html>
   );

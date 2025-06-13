@@ -11,11 +11,17 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as SsoSuccessrootImport } from './routes/sso/success/__root'
 import { Route as LoginImport } from './routes/login'
 import { Route as IndexImport } from './routes/index'
 import { Route as SsoSuccessGoogleImport } from './routes/sso/success/google'
 
 // Create/Update Routes
+
+const SsoSuccessrootRoute = SsoSuccessrootImport.update({
+  id: '/sso/success/__root',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const LoginRoute = LoginImport.update({
   id: '/login',
@@ -53,6 +59,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+    '/sso/success/__root': {
+      id: '/sso/success/__root'
+      path: '/sso/success'
+      fullPath: '/sso/success'
+      preLoaderRoute: typeof SsoSuccessrootImport
+      parentRoute: typeof rootRoute
+    }
     '/sso/success/google': {
       id: '/sso/success/google'
       path: '/sso/success/google'
@@ -68,12 +81,14 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/sso/success': typeof SsoSuccessrootRoute
   '/sso/success/google': typeof SsoSuccessGoogleRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/sso/success': typeof SsoSuccessrootRoute
   '/sso/success/google': typeof SsoSuccessGoogleRoute
 }
 
@@ -81,27 +96,35 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/sso/success/__root': typeof SsoSuccessrootRoute
   '/sso/success/google': typeof SsoSuccessGoogleRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/sso/success/google'
+  fullPaths: '/' | '/login' | '/sso/success' | '/sso/success/google'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/sso/success/google'
-  id: '__root__' | '/' | '/login' | '/sso/success/google'
+  to: '/' | '/login' | '/sso/success' | '/sso/success/google'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/sso/success/__root'
+    | '/sso/success/google'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  SsoSuccessrootRoute: typeof SsoSuccessrootRoute
   SsoSuccessGoogleRoute: typeof SsoSuccessGoogleRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  SsoSuccessrootRoute: SsoSuccessrootRoute,
   SsoSuccessGoogleRoute: SsoSuccessGoogleRoute,
 }
 
@@ -117,6 +140,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/login",
+        "/sso/success/__root",
         "/sso/success/google"
       ]
     },
@@ -125,6 +149,9 @@ export const routeTree = rootRoute
     },
     "/login": {
       "filePath": "login.tsx"
+    },
+    "/sso/success/__root": {
+      "filePath": "sso/success/__root.tsx"
     },
     "/sso/success/google": {
       "filePath": "sso/success/google.tsx"
