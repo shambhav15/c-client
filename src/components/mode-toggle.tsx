@@ -1,7 +1,8 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { useTheme } from "./theme-provider";
-import { Button } from "./ui/buttons/button";
+// import { Button } from "./ui/buttons/button";
+import { Button } from "@/components/ui/button";
 
 export const MoonIcon = (props: any) => {
   return (

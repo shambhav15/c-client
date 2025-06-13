@@ -1,11 +1,9 @@
 import {
   HeadContent,
-  Link,
   Outlet,
   Scripts,
   createRootRouteWithContext,
   type ErrorComponentProps,
-  useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import * as React from "react";
@@ -71,26 +69,14 @@ export const Route = createRootRouteWithContext<{
 });
 
 function RootComponent() {
-  const routerState = useRouterState();
-  const currentPath = routerState.location.pathname;
-
-  // Hide sidebar for login pages
-  const hideLayout = currentPath.startsWith("/login");
-
   return (
-    <RootDocument hideLayout={hideLayout}>
+    <RootDocument>
       <Outlet />
     </RootDocument>
   );
 }
 
-function RootDocument({
-  children,
-  hideLayout = false,
-}: {
-  children: React.ReactNode;
-  hideLayout?: boolean;
-}) {
+function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <head>
@@ -98,20 +84,11 @@ function RootDocument({
       </head>
       <body>
         <ThemeProvider>
-          {!hideLayout && (
-            <>
-              <RadixSidebarDemo />
-              <div className="fixed top-4 right-4 z-50">
-                <ThemeToggle />
-              </div>
-            </>
-          )}
+          <RadixSidebarDemo />
+          <div className="fixed top-4 right-4 z-50">
+            <ThemeToggle />
+          </div>
           {children}
-          {hideLayout && (
-            <div className="fixed top-4 right-4 z-50">
-              <ThemeToggle />
-            </div>
-          )}
         </ThemeProvider>
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />

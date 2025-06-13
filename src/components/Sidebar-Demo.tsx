@@ -72,91 +72,67 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ChatUi from "./ChatUi";
-
-
+import { Button } from "./ui/button";
+import { authClient } from "@/lib/auth-client";
 const DATA = {
   user: {
-    name: "Skyleen",
-    email: "skyleen@example.com",
-    avatar:
-      "https://pbs.twimg.com/profile_images/1909615404789506048/MTqvRsjo_400x400.jpg",
+    name: "You",
+    email: "you@example.com",
+    avatar: "/api/placeholder/400/400",
   },
-  teams: [
+  chats: [
     {
-      name: "Acme Inc",
+      name: "General Chat",
       logo: GalleryVerticalEnd,
-      plan: "Enterprise",
+      status: "Online",
     },
     {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
+      name: "AI Assistant",
+      logo: Bot,
+      status: "Active",
     },
     {
-      name: "Evil Corp.",
+      name: "Support",
       logo: Command,
-      plan: "Free",
+      status: "Available",
     },
   ],
   navMain: [
     {
-      title: "Playground",
+      title: "Chat",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
-          title: "History",
+          title: "Recent",
           url: "#",
         },
         {
-          title: "Starred",
+          title: "Favorites",
           url: "#",
         },
         {
-          title: "Settings",
+          title: "Archived",
           url: "#",
         },
       ],
     },
     {
-      title: "Models",
+      title: "AI Assistant",
       url: "#",
       icon: Bot,
       items: [
         {
-          title: "Genesis",
+          title: "General Chat",
           url: "#",
         },
         {
-          title: "Explorer",
+          title: "Code Helper",
           url: "#",
         },
         {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
+          title: "Writing",
           url: "#",
         },
       ],
@@ -167,37 +143,37 @@ const DATA = {
       icon: Settings2,
       items: [
         {
-          title: "General",
+          title: "Profile",
           url: "#",
         },
         {
-          title: "Team",
+          title: "Notifications",
           url: "#",
         },
         {
-          title: "Billing",
+          title: "Privacy",
           url: "#",
         },
         {
-          title: "Limits",
+          title: "Appearance",
           url: "#",
         },
       ],
     },
   ],
-  projects: [
+  contacts: [
     {
-      name: "Design Engineering",
+      name: "John Doe",
       url: "#",
       icon: Frame,
     },
     {
-      name: "Sales & Marketing",
+      name: "Jane Smith",
       url: "#",
       icon: PieChart,
     },
     {
-      name: "Travel",
+      name: "Alex Johnson",
       url: "#",
       icon: Map,
     },
@@ -206,9 +182,20 @@ const DATA = {
 
 export const RadixSidebarDemo = () => {
   const isMobile = useIsMobile();
-  const [activeTeam, setActiveTeam] = React.useState(DATA.teams[0]);
+  const [activeChat, setActiveChat] = React.useState(DATA.chats[0]);
+  // In your component:
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await authClient.signIn.social({
+        provider: "google",
+      });
+      console.log("res:", response);
+    } catch (error) {
+      console.error("Login error:", error);
+    }
+  };
 
-  if (!activeTeam) return null;
+  if (!activeChat) return null;
 
   return (
     <SidebarProvider>
@@ -224,14 +211,14 @@ export const RadixSidebarDemo = () => {
                     className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   >
                     <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                      <activeTeam.logo className="size-4" />
+                      <activeChat.logo className="size-4" />
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">
-                        {activeTeam.name}
+                        {activeChat.name}
                       </span>
                       <span className="truncate text-xs">
-                        {activeTeam.plan}
+                        {activeChat.status}
                       </span>
                     </div>
                     <ChevronsUpDown className="ml-auto" />
@@ -244,18 +231,18 @@ export const RadixSidebarDemo = () => {
                   sideOffset={4}
                 >
                   <DropdownMenuLabel className="text-xs text-muted-foreground">
-                    Teams
+                    Chats
                   </DropdownMenuLabel>
-                  {DATA.teams.map((team, index) => (
+                  {DATA.chats.map((chat, index) => (
                     <DropdownMenuItem
-                      key={team.name}
-                      onClick={() => setActiveTeam(team)}
+                      key={chat.name}
+                      onClick={() => setActiveChat(chat)}
                       className="gap-2 p-2"
                     >
                       <div className="flex size-6 items-center justify-center rounded-sm border">
-                        <team.logo className="size-4 shrink-0" />
+                        <chat.logo className="size-4 shrink-0" />
                       </div>
-                      {team.name}
+                      {chat.name}
                       <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
                     </DropdownMenuItem>
                   ))}
@@ -265,7 +252,7 @@ export const RadixSidebarDemo = () => {
                       <Plus className="size-4" />
                     </div>
                     <div className="font-medium text-muted-foreground">
-                      Add team
+                      Add chat
                     </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -315,11 +302,11 @@ export const RadixSidebarDemo = () => {
           </SidebarGroup>
           {/* Nav Main */}
 
-          {/* Nav Project */}
+          {/* Nav Contacts */}
           <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-            <SidebarGroupLabel>Projects</SidebarGroupLabel>
+            <SidebarGroupLabel>Contacts</SidebarGroupLabel>
             <SidebarMenu>
-              {DATA.projects.map((item) => (
+              {DATA.contacts.map((item) => (
                 <SidebarMenuItem key={item.name}>
                   <SidebarMenuButton asChild>
                     <a href={item.url}>
@@ -341,16 +328,16 @@ export const RadixSidebarDemo = () => {
                     >
                       <DropdownMenuItem>
                         <Folder className="text-muted-foreground" />
-                        <span>View Project</span>
+                        <span>View Profile</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem>
                         <Forward className="text-muted-foreground" />
-                        <span>Share Project</span>
+                        <span>Send Message</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem>
                         <Trash2 className="text-muted-foreground" />
-                        <span>Delete Project</span>
+                        <span>Remove Contact</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -364,7 +351,7 @@ export const RadixSidebarDemo = () => {
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
-          {/* Nav Project */}
+          {/* Nav Contacts */}
         </SidebarContent>
         <SidebarFooter>
           {/* Nav User */}
@@ -465,13 +452,11 @@ export const RadixSidebarDemo = () => {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Application
-                  </BreadcrumbLink>
+                  <BreadcrumbLink href="#">Chat App</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                  <BreadcrumbPage>AI Assistant</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -479,7 +464,13 @@ export const RadixSidebarDemo = () => {
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" /> */}
-          <ChatUi />  
+          <ChatUi />
+          <Button
+            onClick={handleGoogleLogin}
+            className="flex items-center justify-center gap-2 w-full max-w-sm mx-auto bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm"
+          >
+            Sign in with Google
+          </Button>
         </div>
       </SidebarInset>
     </SidebarProvider>
