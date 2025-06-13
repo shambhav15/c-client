@@ -11,27 +11,20 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as AnotherImport } from './routes/another'
+import { Route as LoginImport } from './routes/login'
 import { Route as IndexImport } from './routes/index'
-import { Route as UsersUserIdImport } from './routes/users.$userId'
 
 // Create/Update Routes
 
-const AnotherRoute = AnotherImport.update({
-  id: '/another',
-  path: '/another',
+const LoginRoute = LoginImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRoute,
 } as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const UsersUserIdRoute = UsersUserIdImport.update({
-  id: '/users/$userId',
-  path: '/users/$userId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -46,18 +39,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/another': {
-      id: '/another'
-      path: '/another'
-      fullPath: '/another'
-      preLoaderRoute: typeof AnotherImport
-      parentRoute: typeof rootRoute
-    }
-    '/users/$userId': {
-      id: '/users/$userId'
-      path: '/users/$userId'
-      fullPath: '/users/$userId'
-      preLoaderRoute: typeof UsersUserIdImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
   }
@@ -67,42 +53,37 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/another': typeof AnotherRoute
-  '/users/$userId': typeof UsersUserIdRoute
+  '/login': typeof LoginRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/another': typeof AnotherRoute
-  '/users/$userId': typeof UsersUserIdRoute
+  '/login': typeof LoginRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/another': typeof AnotherRoute
-  '/users/$userId': typeof UsersUserIdRoute
+  '/login': typeof LoginRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/another' | '/users/$userId'
+  fullPaths: '/' | '/login'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/another' | '/users/$userId'
-  id: '__root__' | '/' | '/another' | '/users/$userId'
+  to: '/' | '/login'
+  id: '__root__' | '/' | '/login'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AnotherRoute: typeof AnotherRoute
-  UsersUserIdRoute: typeof UsersUserIdRoute
+  LoginRoute: typeof LoginRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AnotherRoute: AnotherRoute,
-  UsersUserIdRoute: UsersUserIdRoute,
+  LoginRoute: LoginRoute,
 }
 
 export const routeTree = rootRoute
@@ -116,18 +97,14 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/another",
-        "/users/$userId"
+        "/login"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/another": {
-      "filePath": "another.tsx"
-    },
-    "/users/$userId": {
-      "filePath": "users.$userId.tsx"
+    "/login": {
+      "filePath": "login.tsx"
     }
   }
 }
