@@ -84,7 +84,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ThemeProvider>
-          <RadixSidebarDemo />
+          {/* <RadixSidebarDemo /> */}
           <div className="fixed top-4 right-4 z-50">
             <ThemeToggle />
           </div>
@@ -92,6 +92,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         </ThemeProvider>
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
+        
       </body>
     </html>
   );
