@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { X, Loader2 } from "lucide-react";
-import { signIn } from "@/lib/auth-client";
+import { X, Loader2, Mail } from "lucide-react";
+import { signIn, signInWithMagicLink   } from "@/lib/auth-client";
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -23,6 +23,7 @@ export default function Login() {
     password: "",
   });
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isMagicLinkLoading, setIsMagicLinkLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -49,6 +50,21 @@ export default function Login() {
       setIsGoogleLoading(false);
     }
   };
+
+  const handleMagicLinkLogin = async () => {
+    if (isMagicLinkLoading || !formData.email) return;
+
+    setIsMagicLinkLoading(true);
+    try {
+      const response = await signInWithMagicLink(formData.email);
+      console.log("res:", response);
+    } catch (error) {
+      console.error("Magic link error:", error);
+    } finally {
+      setIsMagicLinkLoading(false);
+    }
+  };
+ 
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -177,6 +193,24 @@ export default function Login() {
                         className="w-full h-9 bg-white text-black hover:bg-white/90 font-medium text-xs transition-all duration-200 shadow-lg"
                       >
                         Sign in
+                      </Button>
+
+                      {/* Magic Link Button */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-9 bg-white/10 border-white/40 text-white hover:bg-white/20 backdrop-blur-sm text-xs"
+                        onClick={handleMagicLinkLogin}
+                        disabled={isMagicLinkLoading || !formData.email}
+                      >
+                        {isMagicLinkLoading ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Mail className="w-4 h-4 mr-2" />
+                        )}
+                        {isMagicLinkLoading
+                          ? "Sending link..."
+                          : "Send magic link"}
                       </Button>
 
                       {/* Divider */}
@@ -369,6 +403,24 @@ export default function Login() {
                         className="w-full h-9 bg-white text-black hover:bg-white/90 font-medium text-xs transition-all duration-200 shadow-lg"
                       >
                         Create an account
+                      </Button>
+
+                      {/* Magic Link Button */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-9 bg-white/10 border-white/40 text-white hover:bg-white/20 backdrop-blur-sm text-xs"
+                        onClick={handleMagicLinkLogin}
+                        disabled={isMagicLinkLoading || !formData.email}
+                      >
+                        {isMagicLinkLoading ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Mail className="w-4 h-4 mr-2" />
+                        )}
+                        {isMagicLinkLoading
+                          ? "Sending link..."
+                          : "Send magic link"}
                       </Button>
 
                       {/* Divider */}
