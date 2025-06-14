@@ -9,14 +9,14 @@ export const authClient = createAuthClient({
 export const signIn = async () => {
   return await authClient.signIn.social({
     provider: "google",
-    callbackURL: "http://localhost:3000/sso/success/google",
+    callbackURL: "http://localhost:3000/",
   });
 };
 
 export const signInWithMagicLink = async (email: string) => {
   return await authClient.signIn.magicLink({
     email,
-    callbackURL: "http://localhost:3000/sso/success/magic-link",
+    callbackURL: "http://localhost:3000/",
   });
 };
 

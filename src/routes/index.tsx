@@ -5,15 +5,18 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { LogoutButton } from "@/components/LogoutButton";
 
 export const Route = createFileRoute("/")({
-  beforeLoad: async () => {
-    await requireAuth();
-  },
+  // beforeLoad: async () => {
+  //   await requireAuth();
+  // },
   component: Home,
 });
 
 function Home() {
   const { data: session, isPending } = useSession();
   const user = session?.user;
+
+  console.log("Home component - Session:", session); // Debug log
+  console.log("Home component - User:", user); // Debug log
 
   const handleGoogleLogin = async () => {
     try {
@@ -44,6 +47,16 @@ function Home() {
         <p className="text-muted-foreground">
           Select a contact from the sidebar to start chatting
         </p>
+
+        {/* Debug info */}
+        <div className="mt-4 p-4 bg-gray-100 rounded text-sm text-left">
+          <h3 className="font-bold">Debug Info:</h3>
+          <p>isPending: {isPending.toString()}</p>
+          <p>session exists: {!!session ? "yes" : "no"}</p>
+          <p>user exists: {!!user ? "yes" : "no"}</p>
+          {user && <p>user name: {user.name}</p>}
+          {user && <p>user email: {user.email}</p>}
+        </div>
 
         {/* Show logout button if user is authenticated */}
         {user && (
