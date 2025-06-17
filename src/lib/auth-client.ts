@@ -2,7 +2,8 @@ import { createAuthClient } from "better-auth/react";
 import { magicLinkClient } from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
-  baseURL: "http://localhost:9000/api/auth",
+  // baseURL: "http://localhost:9000/api/auth",
+  baseURL: "https://chat-v3-s103.onrender.com/api/auth",
   plugins: [magicLinkClient()],
   });
 

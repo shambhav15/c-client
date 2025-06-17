@@ -71,10 +71,10 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import ChatUi from "./ChatUi";
+import { ChatUi } from "@/components/chat";
 import { Button } from "./ui/button";
 import { signIn, useSession } from "@/lib/auth-client";
-import { LogoutButton } from "@/components/LogoutButton";
+import { LogoutButton } from "@/components/auth";
 
 const DATA = {
   user: {
@@ -165,19 +165,69 @@ const DATA = {
   ],
   contacts: [
     {
-      name: "John Doe",
-      url: "#",
-      icon: Frame,
+      name: "InternalPyre",
+      avatar: "/assets/profiles/profile1.png",
+      status: "online",
+      lastSeen: "Just now",
     },
     {
-      name: "Jane Smith",
-      url: "#",
-      icon: PieChart,
+      name: "Discord Official",
+      avatar: "/assets/profiles/profile2.png",
+      status: "online",
+      lastSeen: "2 min ago",
+      badge: "OFFICIAL",
     },
     {
-      name: "Alex Johnson",
-      url: "#",
-      icon: Map,
+      name: "Aradhana",
+      avatar: "/assets/profiles/profile3.png",
+      status: "away",
+      lastSeen: "5 min ago",
+    },
+    {
+      name: "Dyno",
+      avatar: "/assets/profiles/profile4.png",
+      status: "online",
+      lastSeen: "Playing dyno.gg | ?help",
+      isBot: true,
+    },
+    {
+      name: "MEE6",
+      avatar: "/assets/profiles/profile5.png",
+      status: "online",
+      lastSeen: "Playing 🎮 /mee6-games 🎮",
+      isBot: true,
+    },
+    {
+      name: "Carl-bot",
+      avatar: "/assets/profiles/profile1.png",
+      status: "online",
+      lastSeen: "Active",
+      isBot: true,
+    },
+    {
+      name: "Unis",
+      avatar: "/assets/profiles/profile2.png",
+      status: "offline",
+      lastSeen: "Last seen 2 hours ago",
+    },
+    {
+      name: "Captcha.bot",
+      avatar: "/assets/profiles/profile3.png",
+      status: "online",
+      lastSeen: "Active",
+      isBot: true,
+    },
+    {
+      name: "TT Boss",
+      avatar: "/assets/profiles/profile4.png",
+      status: "dnd",
+      lastSeen: "Do not disturb",
+    },
+    {
+      name: "hyper_dilip",
+      avatar: "/assets/profiles/profile5.png",
+      status: "online",
+      lastSeen: "Just now",
     },
   ],
 };
@@ -185,10 +235,30 @@ const DATA = {
 export const RadixSidebarDemo = () => {
   const isMobile = useIsMobile();
   const [activeChat, setActiveChat] = React.useState(DATA.chats[0]);
+  const [selectedContact, setSelectedContact] = React.useState<
+    (typeof DATA.contacts)[0] | null
+  >(null);
   const { data: session } = useSession();
   const user = session?.user;
 
   if (!activeChat) return null;
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "online":
+        return "bg-green-500";
+      case "away":
+        return "bg-yellow-500";
+      case "dnd":
+        return "bg-red-500";
+      case "offline":
+        return "bg-gray-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  const isGeneralChat = activeChat.name === "General Chat";
 
   return (
     <SidebarProvider>
@@ -256,95 +326,188 @@ export const RadixSidebarDemo = () => {
         </SidebarHeader>
 
         <SidebarContent>
-          {/* Nav Main */}
-          <SidebarGroup>
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
-            <SidebarMenu>
-              {DATA.navMain.map((item) => (
-                <Collapsible
-                  key={item.title}
-                  asChild
-                  defaultOpen={item.isActive}
-                  className="group/collapsible"
-                >
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton tooltip={item.title}>
-                        {item.icon && <item.icon />}
-                        <span>{item.title}</span>
-                        <ChevronRight className="ml-auto transition-transform duration-300 group-data-[state=open]/collapsible:rotate-90" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        {item.items?.map((subItem) => (
-                          <SidebarMenuSubItem key={subItem.title}>
-                            <SidebarMenuSubButton asChild>
-                              <a href={subItem.url}>
-                                <span>{subItem.title}</span>
-                              </a>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-              ))}
-            </SidebarMenu>
-          </SidebarGroup>
-          {/* Nav Main */}
-
-          {/* Nav Contacts */}
-          <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-            <SidebarGroupLabel>Contacts</SidebarGroupLabel>
-            <SidebarMenu>
-              {DATA.contacts.map((item) => (
-                <SidebarMenuItem key={item.name}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.name}</span>
-                    </a>
-                  </SidebarMenuButton>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <SidebarMenuAction showOnHover>
-                        <MoreHorizontal />
-                        <span className="sr-only">More</span>
-                      </SidebarMenuAction>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-48 rounded-lg"
-                      side={isMobile ? "bottom" : "right"}
-                      align={isMobile ? "end" : "start"}
+          {isGeneralChat ? (
+            /* Contacts List for General Chat */
+            <SidebarGroup>
+              <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+                Direct Messages
+              </SidebarGroupLabel>
+              <SidebarMenu className="group-data-[collapsible=icon]:space-y-2">
+                {DATA.contacts.map((contact) => (
+                  <SidebarMenuItem key={contact.name}>
+                    <SidebarMenuButton
+                      className="h-12 justify-start gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
+                      onClick={() => setSelectedContact(contact)}
                     >
-                      <DropdownMenuItem>
-                        <Folder className="text-muted-foreground" />
-                        <span>View Profile</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Forward className="text-muted-foreground" />
-                        <span>Send Message</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        <Trash2 className="text-muted-foreground" />
-                        <span>Remove Contact</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </SidebarMenuItem>
-              ))}
-              <SidebarMenuItem>
-                <SidebarMenuButton className="text-sidebar-foreground/70">
-                  <MoreHorizontal className="text-sidebar-foreground/70" />
-                  <span>More</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-          {/* Nav Contacts */}
+                      <div className="relative">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src={contact.avatar}
+                            alt={contact.name}
+                          />
+                          <AvatarFallback>
+                            {contact.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        {/* Status indicator */}
+                        <div
+                          className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background ${getStatusColor(contact.status)}`}
+                        ></div>
+                      </div>
+                      <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate font-medium text-sm">
+                            {contact.name}
+                          </span>
+                          {contact.badge && (
+                            <span className="px-1.5 py-0.5 text-xs bg-blue-600 text-white rounded text-[10px] font-bold">
+                              {contact.badge}
+                            </span>
+                          )}
+                          {contact.isBot && (
+                            <span className="px-1.5 py-0.5 text-xs bg-indigo-600 text-white rounded text-[10px] font-bold">
+                              BOT
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {contact.lastSeen}
+                        </p>
+                      </div>
+                    </SidebarMenuButton>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <SidebarMenuAction
+                          showOnHover
+                          className="group-data-[collapsible=icon]:hidden"
+                        >
+                          <MoreHorizontal />
+                          <span className="sr-only">More</span>
+                        </SidebarMenuAction>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        className="w-48 rounded-lg"
+                        side={isMobile ? "bottom" : "right"}
+                        align={isMobile ? "end" : "start"}
+                      >
+                        <DropdownMenuItem>
+                          <span>Send Message</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <span>View Profile</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>
+                          <span>Mute</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">
+                          <span>Block</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroup>
+          ) : (
+            /* Original Navigation for other chats */
+            <>
+              {/* Nav Main */}
+              <SidebarGroup>
+                <SidebarGroupLabel>Platform</SidebarGroupLabel>
+                <SidebarMenu>
+                  {DATA.navMain.map((item) => (
+                    <Collapsible
+                      key={item.title}
+                      asChild
+                      defaultOpen={item.isActive}
+                      className="group/collapsible"
+                    >
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton tooltip={item.title}>
+                            {item.icon && <item.icon />}
+                            <span>{item.title}</span>
+                            <ChevronRight className="ml-auto transition-transform duration-300 group-data-[state=open]/collapsible:rotate-90" />
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {item.items?.map((subItem) => (
+                              <SidebarMenuSubItem key={subItem.title}>
+                                <SidebarMenuSubButton asChild>
+                                  <a href={subItem.url}>
+                                    <span>{subItem.title}</span>
+                                  </a>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroup>
+              {/* Nav Main */}
+
+              {/* Nav Contacts */}
+              <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+                <SidebarGroupLabel>Contacts</SidebarGroupLabel>
+                <SidebarMenu>
+                  {DATA.contacts.slice(0, 3).map((item) => (
+                    <SidebarMenuItem key={item.name}>
+                      <SidebarMenuButton asChild>
+                        <a href="#">
+                          <Avatar className="h-4 w-4">
+                            <AvatarImage src={item.avatar} alt={item.name} />
+                            <AvatarFallback>
+                              {item.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{item.name}</span>
+                        </a>
+                      </SidebarMenuButton>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <SidebarMenuAction showOnHover>
+                            <MoreHorizontal />
+                            <span className="sr-only">More</span>
+                          </SidebarMenuAction>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          className="w-48 rounded-lg"
+                          side={isMobile ? "bottom" : "right"}
+                          align={isMobile ? "end" : "start"}
+                        >
+                          <DropdownMenuItem>
+                            <Folder className="text-muted-foreground" />
+                            <span>View Profile</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Forward className="text-muted-foreground" />
+                            <span>Send Message</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>
+                            <Trash2 className="text-muted-foreground" />
+                            <span>Remove Contact</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </SidebarMenuItem>
+                  ))}
+                  <SidebarMenuItem>
+                    <SidebarMenuButton className="text-sidebar-foreground/70">
+                      <MoreHorizontal className="text-sidebar-foreground/70" />
+                      <span>More</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroup>
+              {/* Nav Contacts */}
+            </>
+          )}
         </SidebarContent>
         <SidebarFooter>
           {/* Nav User */}
@@ -454,12 +617,74 @@ export const RadixSidebarDemo = () => {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>AI Assistant</BreadcrumbPage>
+                  <BreadcrumbPage>{activeChat.name}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
+        <div className="flex-1 p-4">
+          {selectedContact ? (
+            <div className="h-full flex flex-col">
+              {/* Chat Header */}
+              <div className="flex items-center gap-3 p-4 border-b border-border bg-background/50 rounded-t-lg">
+                <div className="relative">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage
+                      src={selectedContact.avatar}
+                      alt={selectedContact.name}
+                    />
+                    <AvatarFallback>
+                      {selectedContact.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div
+                    className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background ${getStatusColor(selectedContact.status)}`}
+                  ></div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-semibold text-lg">
+                      {selectedContact.name}
+                    </h2>
+                    {selectedContact.badge && (
+                      <span className="px-2 py-1 text-xs bg-blue-600 text-white rounded font-bold">
+                        {selectedContact.badge}
+                      </span>
+                    )}
+                    {selectedContact.isBot && (
+                      <span className="px-2 py-1 text-xs bg-indigo-600 text-white rounded font-bold">
+                        BOT
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedContact.lastSeen}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedContact(null)}
+                >
+                  ✕
+                </Button>
+              </div>
+
+              {/* Chat Content */}
+              <div className="flex-1 overflow-hidden">
+                <ChatUi contact={selectedContact} />
+              </div>
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground">
+              <h3 className="text-lg font-semibold mb-2">
+                Welcome to {activeChat.name}
+              </h3>
+              <p>Select a contact to start chatting!</p>
+            </div>
+          )}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
